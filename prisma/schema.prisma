@@ -1,0 +1,281 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model City {
+  id         String     @id @default(cuid())
+  slug       String     @unique
+  nameAr     String
+  nameEn     String
+  summaryAr  String     @default("")
+  summaryEn  String     @default("")
+  active     Boolean    @default(false)
+  lat        Float?
+  lng        Float?
+  sortOrder  Int        @default(0)
+  districts  District[]
+  hotels     Hotel[]
+  landmarks  Landmark[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model District {
+  id        String  @id @default(cuid())
+  cityId    String
+  city      City    @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  slug      String
+  nameAr    String
+  nameEn    String
+  summaryAr String  @default("")
+  summaryEn String  @default("")
+  sortOrder Int     @default(0)
+  hotels    Hotel[]
+
+  @@unique([cityId, slug])
+}
+
+model Landmark {
+  id        String             @id @default(cuid())
+  cityId    String
+  city      City               @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  slug      String             @unique
+  nameAr    String
+  nameEn    String
+  lat       Float
+  lng       Float
+  distances VerifiedDistance[]
+}
+
+model HotelPartner {
+  id             String   @id @default(cuid())
+  reference      String   @unique
+  hotelName      String
+  commercialName String
+  citySlug       String
+  districtSlug   String
+  cityName       String
+  districtName   String
+  classification String   @default("")
+  contactName    String
+  mobile         String
+  whatsapp       String
+  email          String
+  roomCount      Int
+  shortStay      Boolean
+  fullNight      Boolean
+  message        String   @default("")
+  status         String   @default("submitted")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  hotel          Hotel?
+}
+
+model Hotel {
+  id             String             @id @default(cuid())
+  slug           String             @unique
+  partnerId      String?            @unique
+  partner        HotelPartner?      @relation(fields: [partnerId], references: [id])
+  cityId         String
+  city           City               @relation(fields: [cityId], references: [id])
+  districtId     String
+  district       District           @relation(fields: [districtId], references: [id])
+  nameAr         String
+  nameEn         String
+  classification String             @default("")
+  descriptionAr  String             @default("")
+  descriptionEn  String             @default("")
+  lat            Float?
+  lng            Float?
+  bookingModel   String             @default("request")
+  liveInventory  Boolean            @default(false)
+  sponsored      Boolean            @default(false)
+  status         String             @default("draft")
+  whatsapp       String             @default("")
+  phone          String             @default("")
+  email          String             @default("")
+  parking        Boolean            @default(false)
+  accessibility  Boolean            @default(false)
+  luggageStorage Boolean            @default(false)
+  wifi           Boolean            @default(false)
+  policiesAr     String             @default("")
+  policiesEn     String             @default("")
+  checkInAr      String             @default("")
+  checkInEn      String             @default("")
+  cancellationAr String             @default("")
+  cancellationEn String             @default("")
+  recommendedRank Int?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  photos         HotelPhoto[]
+  rooms          Room[]
+  distances      VerifiedDistance[]
+  requests       BookingRequest[]
+  bookings       Booking[]
+  offers         Offer[]
+
+  @@index([status])
+  @@index([cityId, districtId])
+}
+
+model HotelPhoto {
+  id        String  @id @default(cuid())
+  hotelId   String
+  hotel     Hotel   @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  url       String
+  altAr     String  @default("")
+  altEn     String  @default("")
+  verified  Boolean @default(false)
+  sortOrder Int     @default(0)
+}
+
+model Room {
+  id           String             @id @default(cuid())
+  hotelId      String
+  hotel        Hotel              @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  nameAr       String
+  nameEn       String
+  roomType     String             @default("room")
+  capacity     Int
+  privateBath  Boolean            @default(false)
+  sortOrder    Int                @default(0)
+  prices       RoomPrice[]
+  availability AvailabilitySlot[]
+}
+
+model StayDuration {
+  id        String             @id
+  hours     Int?
+  nameAr    String
+  nameEn    String
+  sortOrder Int                @default(0)
+  prices    RoomPrice[]
+  slots     AvailabilitySlot[]
+}
+
+model RoomPrice {
+  id            String       @id @default(cuid())
+  roomId        String
+  room          Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  durationId    String
+  duration      StayDuration @relation(fields: [durationId], references: [id])
+  amountHalalas Int?
+  currency      String       @default("SAR")
+
+  @@unique([roomId, durationId])
+}
+
+model AvailabilitySlot {
+  id          String       @id @default(cuid())
+  roomId      String
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  durationId  String
+  duration    StayDuration @relation(fields: [durationId], references: [id])
+  date        String
+  arrivalTime String?
+  units       Int
+  source      String
+  createdAt   DateTime     @default(now())
+}
+
+model VerifiedDistance {
+  id         String   @id @default(cuid())
+  hotelId    String
+  hotel      Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  landmarkId String
+  landmark   Landmark @relation(fields: [landmarkId], references: [id])
+  meters     Int
+  verifiedOn String
+  sourceNote String   @default("")
+
+  @@unique([hotelId, landmarkId])
+}
+
+model Customer {
+  id        String           @id @default(cuid())
+  name      String
+  mobile    String
+  email     String           @default("")
+  createdAt DateTime         @default(now())
+  requests  BookingRequest[]
+  bookings  Booking[]
+}
+
+model BookingRequest {
+  id          String   @id @default(cuid())
+  reference   String   @unique
+  hotelId     String
+  hotel       Hotel    @relation(fields: [hotelId], references: [id])
+  roomId      String
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  durationId  String
+  date        String
+  arrivalTime String
+  guests      Int
+  notes       String   @default("")
+  status      String   @default("pending_hotel")
+  createdAt   DateTime @default(now())
+  booking     Booking?
+}
+
+model Booking {
+  id            String          @id @default(cuid())
+  reference     String          @unique
+  requestId     String?         @unique
+  request       BookingRequest? @relation(fields: [requestId], references: [id])
+  hotelId       String
+  hotel         Hotel           @relation(fields: [hotelId], references: [id])
+  customerId    String
+  customer      Customer        @relation(fields: [customerId], references: [id])
+  roomId        String
+  durationId    String
+  date          String
+  arrivalTime   String
+  guests        Int
+  amountHalalas Int?
+  currency      String          @default("SAR")
+  source        String
+  status        String          @default("confirmed")
+  createdAt     DateTime        @default(now())
+}
+
+model Offer {
+  id        String  @id @default(cuid())
+  hotelId   String
+  hotel     Hotel   @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  titleAr   String
+  titleEn   String
+  detailsAr String  @default("")
+  detailsEn String  @default("")
+  active    Boolean @default(false)
+  startsOn  String?
+  endsOn    String?
+}
+
+model CommercialModel {
+  id               String  @id @default(cuid())
+  code             String  @unique
+  nameAr           String
+  nameEn           String
+  descriptionAr    String
+  descriptionEn    String
+  rateBps          Int?
+  publicDisclosure Boolean @default(false)
+  active           Boolean @default(true)
+}
+
+model Promotion {
+  id        String   @id @default(cuid())
+  titleAr   String
+  titleEn   String
+  detailsAr String   @default("")
+  detailsEn String   @default("")
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
