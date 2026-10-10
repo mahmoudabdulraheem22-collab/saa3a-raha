@@ -1,25 +1,3 @@
-import type { MetadataRoute } from "next";
-import { legalSlugs } from "@/content/legal";
-import { getActiveCities, getDistricts, getPublishedHotels } from "@/lib/catalog";
-import { absoluteUrl, withLocale, type Locale } from "@/lib/locale";
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [cities, districts, hotels] = await Promise.all([getActiveCities(), getDistricts(), getPublishedHotels()]);
-  const paths = [
-    "/",
-    "/search",
-    "/partners",
-    ...legalSlugs.map((slug) => `/legal/${slug}`),
-    ...cities.map((city) => `/${city.slug}`),
-    ...districts.map((district) => `/${district.citySlug}/${district.slug}`),
-    ...hotels.map((hotel) => `/hotels/${hotel.slug}`),
-  ];
-  const locales: Locale[] = ["ar", "en"];
-
-  return paths.map((path) => ({
-    url: absoluteUrl(withLocale("ar", path)),
-    alternates: {
-      languages: Object.fromEntries(locales.map((locale) => [locale, absoluteUrl(withLocale(locale, path))])),
-    },
-  }));
-}
+import type { MetadataRoute } from 'next';
+import { locations } from '@/lib/store';
+export default async function sitemap():Promise<MetadataRoute.Sitemap>{const base=process.env.NEXT_PUBLIC_SITE_URL||'http://localhost:3000';const cities=await locations();return ['', '/partners',...cities.flatMap(c=>['/'+c.slug,...c.districts.map(d=>'/'+c.slug+'/'+d.slug)])].map(p=>({url:base+p,alternates:{languages:{ar:base+p+'?lang=ar',en:base+p+'?lang=en'}}}));}

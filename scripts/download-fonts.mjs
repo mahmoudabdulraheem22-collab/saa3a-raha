@@ -1,0 +1,2 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+await mkdir('public/fonts',{recursive:true});const css=await(await fetch('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap')).text();const urls=[...css.matchAll(/url\(([^)]+)\)/g)].map(m=>m[1]);for(let i=0;i<urls.length;i++){const r=await fetch(urls[i]);await writeFile(`public/fonts/tajawal-${i}.ttf`,Buffer.from(await r.arrayBuffer()));}console.log('Downloaded',urls.length,'font files');

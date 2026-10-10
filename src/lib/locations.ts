@@ -1,0 +1,14 @@
+export type Lang = 'ar' | 'en';
+export type District = { slug: string; ar: string; en: string };
+export type City = { slug: string; ar: string; en: string; landmarkAr: string; landmarkEn: string; image: string; districts: District[] };
+const districts = (rows: string[]): District[] => rows.map(row => { const [slug,ar,en] = row.split('|'); return {slug,ar,en}; });
+// Launch seed. The locations repository prefers editable database records.
+export const cities: City[] = [
+ {slug:'makkah',ar:'مكة المكرمة',en:'Makkah',landmarkAr:'المسجد الحرام',landmarkEn:'Al Masjid Al Haram',image:'/images/makkah.jpg',districts:districts([
+ 'central|الحرم والمنطقة المركزية|Al Haram / Central Makkah','ajyad|أجياد|Ajyad','jabal-omar|جبل عمر|Jabal Omar','ibrahim-al-khalil|إبراهيم الخليل|Ibrahim Al Khalil','shubaikah|الشبيكة|Al Shubaikah','misfalah|المسفلة|Al Misfalah','jarwal|جرول|Jarwal','taysir|التيسير|Al Taysir','mansour|المنصور|Al Mansour','aziziyah|العزيزية|Al Aziziyah','mahbas-al-jin|محبس الجن|Mahbas Al Jin','maabdah|المعابدة|Al Maabdah','rawdah|الروضة|Al Rawdah','naseem|النسيم|Al Naseem','awali|العوالي|Al Awali','jamiah|الجامعة|Al Jamiah','rusayfah|الرصيفة|Al Rusayfah','kakiyyah|الكعكية|Al Kakiyyah','shoqiyah|الشوقية|Al Shoqiyah','bathaa-quraysh|بطحاء قريش|Bathaa Quraysh','hamra|الحمراء|Al Hamra','zaher|الزاهر|Al Zaher','nuzhah|النزهة|Al Nuzhah','khalidiyah|الخالدية|Al Khalidiyah','hijrah|الهجرة|Al Hijrah','taneem|التنعيم|Al Taneem','wali-al-ahd|ولي العهد|Wali Al Ahd'])},
+ {slug:'madinah',ar:'المدينة المنورة',en:'Madinah',landmarkAr:'المسجد النبوي',landmarkEn:'Al Masjid an Nabawi',image:'/images/madinah.jpg',districts:districts([
+ 'central|الحرم والمنطقة المركزية|Central Madinah / Al Haram','quba|قباء|Quba','qurban|قربان|Qurban','awali|العوالي|Al Awali','anbariyah|العنبرية|Al Anbariyah','manakhah|المناخة|Al Manakhah','iskan|الإسكان|Al Iskan','aridh|العريض|Al Aridh','aziziyah|العزيزية|Al Aziziyah','khalidiyah|الخالدية|Al Khalidiyah','uyun|العيون|Al Uyun','qiblatayn|القبلتين|Al Qiblatayn','sayyid-al-shuhada|سيد الشهداء|Sayyid Al Shuhada','jumuah|الجمعة|Al Jumuah','king-fahd|الملك فهد|King Fahd','shuran|شوران|Shuran','ranuna|الرانوناء|Al Ranuna','aqoul|العاقول|Al Aqoul'])}
+];
+export const durations = ['1','3','6','12','night'] as const;
+export function durationLabel(value:string,lang:Lang) { if(value==='night') return lang==='ar'?'ليلة كاملة':'Full night'; return lang==='ar'?value==='1'?'ساعة واحدة':`${value} ساعات`:`${value} ${value==='1'?'hour':'hours'}`; }
+export const trust = {ar:'ساعة راحة منصة للتسويق والوساطة والحجز بين العملاء والفنادق المشاركة، وتُقدَّم خدمة الإقامة من الفندق وفقًا لتوافر الغرف وأسعاره وسياساته.',en:'Saa3a Raha is a hotel marketing and booking intermediary. Accommodation services are provided by the participating hotel according to its availability, prices and policies.'};

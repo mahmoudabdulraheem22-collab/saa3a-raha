@@ -1,0 +1,2 @@
+import { writeFile } from 'node:fs/promises';
+for (const [name,url] of [['makkah','https://images.unsplash.com/photo-1693590614566-1d3ea9ef32f7?auto=format&fit=crop&w=2000&q=85'],['madinah','https://images.unsplash.com/photo-1707986266196-161cccf565b2?auto=format&fit=crop&w=1400&q=85']]) { const r=await fetch(url); if(!r.ok)throw new Error(String(r.status));await writeFile(`public/images/${name}.jpg`,Buffer.from(await r.arrayBuffer()));console.log(name,'downloaded'); }
